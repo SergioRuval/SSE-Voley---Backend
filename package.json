@@ -1,0 +1,23 @@
+{
+  "name": "sse-voley---backend",
+  "version": "1.0.0",
+  "description": "Backend del sistema SSE Voley para almacenar y despachar información hacia el sistema principal.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SergioRuval/SSE-Voley---Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SergioRuval/SSE-Voley---Backend/issues"
+  },
+  "homepage": "https://github.com/SergioRuval/SSE-Voley---Backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
