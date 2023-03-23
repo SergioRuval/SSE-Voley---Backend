@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     
     console.log(querySnapshot.docs[0].data());
     
-    res.send("Hello");
+    res.send("API active and running");
 });
 
 module.exports = router;
