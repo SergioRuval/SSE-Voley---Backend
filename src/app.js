@@ -6,6 +6,8 @@ const cors = require("cors");
 const app = express();
 
 app.use(morgan());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(require("./routes/index"));
 require("./routes/equipos.routes")(app);
