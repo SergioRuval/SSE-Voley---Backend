@@ -9,5 +9,6 @@ app.use(morgan());
 
 app.use(require("./routes/index"));
 require("./routes/equipos.routes")(app);
+require("./routes/usuarios.routes")(app);
 
 module.exports = app;
