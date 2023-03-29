@@ -30,6 +30,35 @@ exports.findById = async (req, res) => {
 
 }
 
+exports.register = async (req, res) => {
+    // Primero validamos que la petición no esté vacía.
+    if(!req.body.nombre || !req.body.apellidos || !req.body.username
+        || !req.body.rol || !req.body.password){
+            res.status(400).send({
+                message: "No se puede registrar un usuario con un campo vacío"
+            });
+            return;
+        }
+
+    // Si no está vacía, hacemos el registro en la BD obteniendo los campos del body primero
+    try {
+        const { nombre, apellidos, username, rol, password } = req.body;
+        const nuevoUsuario = await Usuario.create({
+            nombre: nombre,
+            apellidos: apellidos,
+            password: password,
+            rol: rol,
+            username: username
+        });
+        res.status(200).json(nuevoUsuario);
+    }catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Hubo un error inesperado al crear al usuario"
+        });
+    }
+}
+
 exports.login = async (req, res) => {
     if(!req.body.username || !req.body.password){
         res.status(400).send({
