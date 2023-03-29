@@ -1,14 +1,15 @@
-const mysql = require("../mysql");
+const Equipo = require("../model/equipo.model");
 
-exports.findAll = (req, res) => {
-    console.log("Obteniendo todos los equipos");
-    // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
-    // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
-    // Para esto puedo crear dos endpoints diferentes, uno para los equipos propios y uno para los contrarios
-    // y así separar la lógica de ambos
-    mysql.query("SELECT * FROM equipo", (err, data, fields) => {
-        if(err) throw err
-        res.status(200).json(data)
+// Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
+// El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
+// Para esto puedo crear dos endpoints diferentes, uno para los equipos propios y uno para los contrarios
+// y así separar la lógica de ambos
+
+exports.findAll = async (req, res) => {
+    await Equipo.findAll().then((data) => {
+        res.status(200).json(data);
+    }).catch((err) => {
+        throw err;
     });
 }
 
