@@ -1,19 +1,16 @@
 // Para configurar express
 const express = require("express");
 const morgan = require("morgan");
-
-const { db } = require("./firebase");
+const cors = require("cors");
 
 const app = express();
 
 app.use(morgan());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/', async (req, res) => {
-    const querySnapshot = await db.collection('Sets').get();
-    
-    console.log(querySnapshot.docs[0].data());
-    
-    res.send("Hello");
-});
+app.use(require("./routes/index"));
+require("./routes/equipos.routes")(app);
+require("./routes/usuarios.routes")(app);
 
 module.exports = app;

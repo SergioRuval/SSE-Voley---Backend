@@ -1,25 +1,16 @@
-// const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
-// const { getFirestore, Timestamp, FieldValue } = require('firebase-admin/firestore');
-
-// var serviceAccount = require("../sse-voley-firebase-adminsdk-wapnv-bd9b58746e.json");
-
-// initializeApp({
-//   credential: cert(serviceAccount)
-// });
-
-// const db = getFirestore();
-
-// const documentReference = db.collection('users').doc('alovelace');
-
-// await documentReference.set({
-//   first: 'Ada',
-//   last: 'lovelace',
-//   born: 1815
-// });
-
 const app = require('./app');
 
-require('./firebase');
+const sequelize = require("./mysql");
 
-app.listen(3000);
-console.log('Server is running on port 3000');
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, () => {
+  console.log('Server is running on port ' + PORT);
+  try{
+    sequelize.authenticate();
+    console.log("Connection to mysl established");
+  }catch(error){
+    console.error("no se pudo conectar", error);
+  }
+
+});
