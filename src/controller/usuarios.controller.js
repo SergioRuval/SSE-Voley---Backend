@@ -9,8 +9,6 @@ exports.findAll = async (req, res) => {
 }
 
 exports.findOneUser = async (req, res) => {
-
-
     // Hacemos la búsqueda del usuario usando la contraseña y el nombre de usuario
     await Usuario.findAll(
         {
