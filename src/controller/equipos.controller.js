@@ -20,11 +20,37 @@ exports.findByID = (req, res) => {
     // Por último retorno el equipo encontrado
 }
 
-exports.create = (req, res) => {
-    console.log("Creando un equipo");
-    // Para crear un equipo primero hay que obtener el objeto json desde la petición req
-    // Este deberíamos pasarlo al modelo de datos para poder insertarlo a la BD
-    // Luego retornamos un resultado exitoso en caso de que se haya insertado
+// Para crear un equipo primero hay que obtener el objeto json desde la petición req
+// Este deberíamos pasarlo al modelo de datos para poder insertarlo a la BD
+// Luego retornamos un resultado exitoso en caso de que se haya insertado
+exports.create = async (req, res) => {
+    if(!req.body.categoria || !req.body.nombre_entidad || 
+        !req.body.nombre_equipo || !req.body.rama || !req.body.tipo_equipo){
+            res.status(400).send({
+                message: "No se puede registrar un equipo con un campo vacío"
+            });
+            return;
+        }
+
+    // Si no está vacía, hacemos el registro en la BD obteniendo los campos del body primero
+    try {
+        const { categoria, contrario, nombre_entidad, nombre_equipo, 
+            rama, tipo_equipo } = req.body;
+        const nuevoEquipo = await Equipo.create({
+            categoria: categoria,
+            contrario: contrario,
+            nombre_entidad: nombre_entidad,
+            nombre_equipo: nombre_equipo,
+            rama: rama,
+            tipo_equipo: tipo_equipo
+        });
+        res.status(200).json(nuevoEquipo);
+    }catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Hubo un error inesperado al crear al equipo"
+        });
+    }
 }
 
 exports.delete = (req, res) => {
