@@ -13,7 +13,9 @@ module.exports = app => {
 
     //checar credenciales para iniciar sesión
     router.post("/login", usuarios.login);
-    
+
+    //asociar un equipo a un usuario
+    router.put("/:idUsuario/equipo/:idEquipo", usuarios.asociateTeam);
 
     app.use("/api/usuarios", router);
 }
