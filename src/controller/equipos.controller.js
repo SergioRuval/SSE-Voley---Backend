@@ -26,9 +26,8 @@ exports.findByID = (req, res) => {
 exports.create = async (req, res) => {
     if(!req.body.categoria || !req.body.nombre_entidad || 
         !req.body.nombre_equipo || !req.body.rama || !req.body.tipo_equipo){
-            res.status(400).send({
-                message: "No se puede registrar un equipo con un campo vacío"
-            });
+            console.log("ERROR: No se puede registrar un equipo con un campo vacío");
+            res.status(400).send(null);
             return;
         }
 
@@ -47,9 +46,7 @@ exports.create = async (req, res) => {
         res.status(200).json(nuevoEquipo);
     }catch (err) {
         console.error(err);
-        res.status(500).json({
-            message: "Hubo un error inesperado al crear al equipo"
-        });
+        res.status(500).send(null);
     }
 }
 
@@ -70,4 +67,11 @@ exports.update = (req, res) => {
     // En caso de que no esté, regresamos un mensaje de error que la aplicación se encargará de procesar
     // Si se encuentra, se sobreescriben los datos del viejo equipo con los del nuevo equipo
     // Por último se devuelve un código de resultado exitoso por el equipo editado
+}
+
+// Para asociar un jugador a un equipo vamos a obtener el id del jugador insertado a la bd
+// Y el id del equipo donde se insertará
+// Luego validamos que ambos id existan y procederemos a insertar ambos id en la tabla correspondiente
+exports.asociatePlayer = async (req, res) => {
+
 }

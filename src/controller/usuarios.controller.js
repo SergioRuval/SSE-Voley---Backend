@@ -111,9 +111,8 @@ exports.login = async (req, res) => {
 // Tras hacer la validación hacemos una inserción de ambos id en la tabla correspondiente
 exports.asociateTeam = async (req, res) => {
     if(!req.params.idEquipo || !req.params.idUsuario){
-        res.status(400).send({
-            message: "Id vacíos"
-        });
+        console.log("Ids vacíos");
+        res.status(400).send(false);
         return;
     }
 
@@ -123,9 +122,8 @@ exports.asociateTeam = async (req, res) => {
     });
 
     if(usuario.length === 0){
-        res.status(400).send({
-            message: "Id de usuario no encontrado"
-        });
+        console.log("Id de usuario no encontrado");
+        res.status(400).send(false);
         return;
     }
 
@@ -135,9 +133,8 @@ exports.asociateTeam = async (req, res) => {
     });
 
     if(equipo.length === 0){
-        res.status(400).send({
-            message: "Id de equipo no encontrado"
-        });
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(false);
         return;
     }
 
@@ -150,6 +147,7 @@ exports.asociateTeam = async (req, res) => {
             res.status(200).send(true);
         }
     }).catch((err) => {
+        console.log("ERROR:" + err.original.message);
         res.status(400).send(false)
     });
 }
