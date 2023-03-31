@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, STRING } = require("sequelize");
+const { Sequelize, DataTypes} = require("sequelize");
 const sequelize = require("../mysql");
 
 const Equipo = sequelize.define('equipo', {
