@@ -8,5 +8,8 @@ module.exports = app => {
     //insertar equipo
     router.post("/", equipos.create);
 
+    //asociar un jugador a un equipo
+    router.put("/:idEquipo/jugadorPropio/:idJugador", equipos.asociatePlayer);
+
     app.use("/api/equipos", router);
 }

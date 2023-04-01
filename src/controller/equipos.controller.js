@@ -1,4 +1,6 @@
 const Equipo = require("../model/equipo.model");
+const Equipo_Jugador_Propio = require("../model/equipo_jugador_propio.model");
+const Jugador_Propio = require("../model/jugador_propio.model");
 
 // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
 // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
@@ -73,5 +75,46 @@ exports.update = (req, res) => {
 // Y el id del equipo donde se insertará
 // Luego validamos que ambos id existan y procederemos a insertar ambos id en la tabla correspondiente
 exports.asociatePlayer = async (req, res) => {
+    // Validamos que los ids no estén vacíos
+    if(!req.params.idEquipo || !req.params.idJugador){
+        console.log("ERROR: No puede asociar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
 
+    // Ahora verificamos que el id del equipo exista en la bd
+    const equipo = await Equipo.findAll({
+        where: { id: req.params.idEquipo }
+    });
+
+    if(equipo.length === 0){
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que exista el equipo
+    const jugador = await Jugador_Propio.findAll({
+        where: { id: req.params.idJugador }
+    });
+
+    if(jugador.length === 0){
+        console.log("Id de jugador no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Ahora hacemos la inserción de ambos id en la tabla de unión
+    await Equipo_Jugador_Propio.create({
+        id_jugador: req.params.idJugador, 
+        id_equipo: req.params.idEquipo
+    }).then((data) => {
+        if(data.length != 0){
+            console.log("Asociación hecha");
+            res.status(200).send(true);
+        }
+    }).catch((err) => {
+        console.log("ERROR: " + err.original.message);
+        res.status(400).send(false)
+    });
 }
