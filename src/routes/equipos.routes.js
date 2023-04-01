@@ -1,9 +1,15 @@
 module.exports = app => {
     const router = require("express").Router();
-    const equipos = require("../controller/equipos.controller")
-;
-    //obtener todos los clientes
+    const equipos = require("../controller/equipos.controller");
+    
+    //obtener todos los equipos
     router.get("/", equipos.findAll);
+
+    //insertar equipo
+    router.post("/", equipos.create);
+
+    //asociar un jugador a un equipo
+    router.put("/:idEquipo/jugadorPropio/:idJugador", equipos.asociatePlayer);
 
     app.use("/api/equipos", router);
 }

@@ -1,4 +1,6 @@
 const Usuario = require("../model/usuario.model");
+const Equipo = require("../model/equipo.model");
+const Usuario_Equipo = require("../model/usuario_equipo.model");
 
 exports.findAll = async (req, res) => {
     await Usuario.findAll().then((data) => {
@@ -9,8 +11,6 @@ exports.findAll = async (req, res) => {
 }
 
 exports.findOneUser = async (req, res) => {
-
-
     // Hacemos la búsqueda del usuario usando la contraseña y el nombre de usuario
     await Usuario.findAll(
         {
@@ -104,4 +104,50 @@ exports.login = async (req, res) => {
             throw err;
         });
     }
+}
+
+// Para asociar un equipo a un usuario necesitamos del id tanto del equipo como del usuario
+// Una vez recibidos, es necesario validar si ambos id existen en sus respectivas tablas
+// Tras hacer la validación hacemos una inserción de ambos id en la tabla correspondiente
+exports.asociateTeam = async (req, res) => {
+    if(!req.params.idEquipo || !req.params.idUsuario){
+        console.log("Ids vacíos");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que exista el usuario
+    const usuario = await Usuario.findAll({
+        where: { id: req.params.idUsuario }
+    });
+
+    if(usuario.length === 0){
+        console.log("Id de usuario no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que exista el equipo
+    const equipo = await Equipo.findAll({
+        where: { id: req.params.idEquipo }
+    });
+
+    if(equipo.length === 0){
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    await Usuario_Equipo.create({
+        id_equipo: req.params.idEquipo,
+        id_usuario: req.params.idUsuario
+    }).then((data) => {
+        if(data.length != 0){
+            console.log("Asociación hecha");
+            res.status(200).send(true);
+        }
+    }).catch((err) => {
+        console.log("ERROR:" + err.original.message);
+        res.status(400).send(false)
+    });
 }
