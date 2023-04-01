@@ -5,8 +5,8 @@ module.exports = app => {
     //obtener todos los jugadores
     router.get("/", jugadores.findJugadoresPropios);
 
-    //insertar equipo
-    // router.post("/", );
+    //insertar jugador
+    router.post("/", jugadores.saveJugadorPropio);
 
     app.use("/api/jugadores", router);
 }

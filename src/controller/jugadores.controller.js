@@ -32,8 +32,32 @@ exports.findJugadorContrario = (req, res) => {
     // Si hay éxito, usamos el id para retornar al jugador correspondiente
 }
 
-exports.saveJugadorPropio = (req, res) => {
-    // Para guardar el jugador necesitamos guardarlo en la tabla jugador propio
-    // Luego usar el id del equipo al que está asociado para agregar un nuevo registro en la tabla
-    // equipo_jugador_propio.
+// Para guardar el jugador necesitamos guardarlo en la tabla jugador propio
+// Desde el body de la petición obtenemos los campos correspondientes al jugador
+// Validamos que ninguno de dichos campos esté vacío
+// Luego hacemos la inserción por medio del modelo de Sequelize
+exports.saveJugadorPropio = async (req, res) => {
+    if(!req.body.genero || !req.body.no_jugador || !req.body.nombre || !req.body.posicion){
+        console.log("ERROR: no puede haber campos vacíos al insertar un jugador");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const { capitan, genero, lesiones, no_jugador, nombre, posicion, titular } = req.body;
+        const nuevoJugador = await JugadorPropio.create({
+            capitan: capitan,
+            genero: genero,
+            no_jugador: no_jugador,
+            nombre: nombre,
+            posicion: posicion,
+            lesiones: lesiones,
+            titular: titular
+        });
+        console.log("Jugador añadido satisfactoriamente");
+        res.status(200).json(nuevoJugador);
+    }catch (err) {
+        console.error(err);
+        res.status(500).send(null);
+    }
 }
