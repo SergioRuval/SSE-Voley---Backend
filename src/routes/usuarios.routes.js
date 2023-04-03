@@ -17,5 +17,8 @@ module.exports = app => {
     //asociar un equipo a un usuario
     router.put("/:idUsuario/equipo/:idEquipo", usuarios.asociateTeam);
 
+    //obtener los equipos por usuario
+    router.get("/:idUsuario/equipos", usuarios.findTeams);
+
     app.use("/api/usuarios", router);
 }

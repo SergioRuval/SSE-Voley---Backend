@@ -8,5 +8,11 @@ module.exports = app => {
     //insertar jugador
     router.post("/", jugadores.saveJugadorPropio);
 
+    //editar jugador
+    router.put("/:idJugador", jugadores.editJugadorPropio);
+
+    //borrar jugador
+    router.delete("/:idJugador", jugadores.deleteJugadorPropio);
+
     app.use("/api/jugadores", router);
 }

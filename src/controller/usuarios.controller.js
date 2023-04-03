@@ -1,6 +1,4 @@
-const Usuario = require("../model/usuario.model");
-const Equipo = require("../model/equipo.model");
-const Usuario_Equipo = require("../model/usuario_equipo.model");
+const {Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio, Usuario_Equipo} = require("../model/Relations/relaciones.model.js");
 
 exports.findAll = async (req, res) => {
     await Usuario.findAll().then((data) => {
@@ -150,4 +148,60 @@ exports.asociateTeam = async (req, res) => {
         console.log("ERROR:" + err.original.message);
         res.status(400).send(false)
     });
+}
+
+// Para encontrar equipos por usuario hay que obtener el id del usuario desde los parámetros de la ruta
+// Luego usar ese id para hacer la búsqueda usando el modelo usuario_equipo
+// El modelo retornará el usuario y un array de equipos, por lo que sólo es necesario retornar el array
+// de equipos
+exports.findTeams = async (req, res) => {
+    // Checamos que el id no esté vacío
+    if(!req.params.idUsuario){
+        console.log("Id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Ahora revisamos que el id de usuario sea válido
+    const usuario = await Usuario.findAll({
+        where: { id: req.params.idUsuario }
+    });
+
+    if(usuario.length === 0){
+        console.log("Id de usuario no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Por último, si pasa las validaciones, hacemos la búsqueda de los equipos
+    await Usuario.findAll({
+        where: { id: req.params.idUsuario },
+        include: {
+            model: Equipo,
+            through: {
+                model: Usuario_Equipo,
+            },
+            include: [
+                {
+                    model: Jugador_Propio,
+                    through: { model: Equipo_Jugador_Propio }
+                },
+                {
+                    model: Prueba_Fisica
+                }
+            ]
+        }
+    }).then((data) => {
+        if(data.length != 0){
+            console.log("Equipos encontrados");
+            res.status(200).json(data[0].equipos);
+        }else{
+            console.log("No hay equipos para el usuario");
+            res.status(400).json([]);
+            return;
+        }
+    }).catch((err) => {
+        console.log("ERROR:" + err.message);
+        res.status(400).send(false)
+    });;
 }
