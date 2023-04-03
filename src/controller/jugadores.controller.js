@@ -1,3 +1,4 @@
+const Equipo_Jugador_Propio = require("../model/equipo_jugador_propio.model");
 const JugadorPropio = require("../model/jugador_propio.model");
 
 
@@ -67,6 +68,8 @@ exports.saveJugadorPropio = async (req, res) => {
 // Luego validamos que los datos del jugador tampoco estén vacíos
 // Después validamos que el jugador a editar exista
 // Luego construimos el objeto de jugador para sustituir los campos
+// Hacemos el update con el modelo de Sequelize
+// Si se actualiza 1 registro, entonces obtenemos el jugador editado y lo enviamos
 exports.editJugadorPropio = async (req, res) => {
     if(!req.params.idJugador){
         console.log("ERROR: no puede haber un id vacío");
@@ -125,5 +128,54 @@ exports.editJugadorPropio = async (req, res) => {
     }catch (err) {
         console.error(err);
         res.status(500).send(null);
+    }
+}
+
+// Para borrar un jugador primero validamos que llegue un id no vacío
+// Luego validamos que el jugador exista
+// Si existe, borramos primero el registro en la tabla que lo relaciona con un equipo
+// Luego lo borramos de la tabla de jugadores
+exports.deleteJugadorPropio = async (req, res) => {
+    if(!req.params.idJugador){
+        console.log("ERROR: no puede haber un id vacío");
+        res.status(400).send(null);
+        return;
+    }
+
+    const jugador = await JugadorPropio.findAll({
+        where: { id: req.params.idJugador }
+    });
+
+    if(jugador.length === 0){
+        console.log("ERROR: no se encontró al jugador");
+        res.status(400).send(null);
+        return;
+    }
+
+    const asociacionEquipo = await Equipo_Jugador_Propio.destroy({
+        where: { id_jugador: req.params.idJugador }
+    });
+
+    if(asociacionEquipo > 0){
+        console.log("Asociación del jugador con equipos eliminada");
+    }else{
+        console.log("ERROR: no se pudo desasociar al jugador");
+        res.status(500).send(null);
+        return;
+    }
+
+    const jugadoresEliminados = await JugadorPropio.destroy({
+        where: { id: req.params.idJugador }
+    });
+
+    if(jugadoresEliminados > 0){
+        res.status(200).send({
+            message: "Jugador eliminado con éxito"
+        });
+        return
+    }else{
+        console.log("ERROR: no se pudo eliminar al jugador");
+        res.status(500).send(null);
+        return;
     }
 }

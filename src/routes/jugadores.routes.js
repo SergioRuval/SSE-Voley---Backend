@@ -11,5 +11,8 @@ module.exports = app => {
     //editar jugador
     router.put("/:idJugador", jugadores.editJugadorPropio);
 
+    //borrar jugador
+    router.delete("/:idJugador", jugadores.deleteJugadorPropio);
+
     app.use("/api/jugadores", router);
 }
