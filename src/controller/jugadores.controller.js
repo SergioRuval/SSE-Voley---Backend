@@ -61,3 +61,69 @@ exports.saveJugadorPropio = async (req, res) => {
         res.status(500).send(null);
     }
 }
+
+
+// Para editar obtenemos el id del jugador y checamos que no esté vacío
+// Luego validamos que los datos del jugador tampoco estén vacíos
+// Después validamos que el jugador a editar exista
+// Luego construimos el objeto de jugador para sustituir los campos
+exports.editJugadorPropio = async (req, res) => {
+    if(!req.params.idJugador){
+        console.log("ERROR: no puede haber un id vacío");
+        res.status(400).send(null);
+        return;
+    }
+
+    if(!req.body.genero || !req.body.no_jugador || !req.body.nombre || !req.body.posicion){
+        console.log("ERROR: no puede haber campos vacíos al editar un jugador");
+        res.status(400).send(null);
+        return;
+    }
+
+    const jugador = await JugadorPropio.findAll({
+        where: { id: req.params.idJugador }
+    });
+
+    if(jugador.length === 0){
+        console.log("Id de jugador no encontrado");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const { capitan, genero, lesiones, no_jugador, nombre, posicion, titular  } = req.body;
+        const registrosEditados = await JugadorPropio.update(
+            {
+                capitan: capitan,
+                genero: genero,
+                no_jugador: no_jugador,
+                nombre: nombre,
+                posicion: posicion,
+                lesiones: lesiones,
+                titular: titular
+            },
+            {
+                where: { id: req.params.idJugador }
+            }
+        );
+        if(registrosEditados.length > 0){
+            console.log("Jugador añadido satisfactoriamente");
+            const jugadorEditado = await JugadorPropio.findAll({
+                where: { id: req.params.idJugador }
+            });
+
+            if(jugadorEditado.length > 0){
+                res.status(200).json(jugadorEditado[0]);
+            }else{
+                console.log("No se pudo obtener al jugador editado");
+                res.status(500).send(null);
+            }
+        }else{
+            console.log("Jugador no editado");
+            res.status(500).send(null);
+        }
+    }catch (err) {
+        console.error(err);
+        res.status(500).send(null);
+    }
+}

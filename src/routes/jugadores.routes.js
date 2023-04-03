@@ -8,5 +8,8 @@ module.exports = app => {
     //insertar jugador
     router.post("/", jugadores.saveJugadorPropio);
 
+    //editar jugador
+    router.put("/:idJugador", jugadores.editJugadorPropio);
+
     app.use("/api/jugadores", router);
 }
