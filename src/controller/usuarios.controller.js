@@ -1,8 +1,4 @@
-const Usuario = require("../model/usuario.model");
-const Equipo = require("../model/equipo.model");
-const Usuario_Equipo = require("../model/usuario_equipo.model");
-const Jugador_Propio = require("../model/jugador_propio.model");
-const Equipo_Jugador_Propio = require("../model/equipo_jugador_propio.model");
+const {Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio, Usuario_Equipo} = require("../model/Relations/relaciones.model.js");
 
 exports.findAll = async (req, res) => {
     await Usuario.findAll().then((data) => {
@@ -189,6 +185,9 @@ exports.findTeams = async (req, res) => {
                 {
                     model: Jugador_Propio,
                     through: { model: Equipo_Jugador_Propio }
+                },
+                {
+                    model: Prueba_Fisica
                 }
             ]
         }
@@ -202,7 +201,7 @@ exports.findTeams = async (req, res) => {
             return;
         }
     }).catch((err) => {
-        console.log("ERROR:" + err.original.message);
+        console.log("ERROR:" + err.message);
         res.status(400).send(false)
     });;
 }
