@@ -39,7 +39,7 @@ exports.create = async (req, res) => {
             rama, tipo_equipo } = req.body;
         const nuevoEquipo = await Equipo.create({
             categoria: categoria,
-            contrario: contrario,
+            contrario: contrario  == "False" ? false : true,
             nombre_entidad: nombre_entidad,
             nombre_equipo: nombre_equipo,
             rama: rama,
