@@ -95,12 +95,82 @@ exports.delete = (req, res) => {
     // Por último habría que borrar el equipo, una vez que todo lo demás ha sido borrado
 }
 
-exports.update = (req, res) => {
-    console.log("Actualizando un equipo");
-    // Para actualizar un equipo hay que consultar que el equipo se encuentre en la bd
-    // En caso de que no esté, regresamos un mensaje de error que la aplicación se encargará de procesar
-    // Si se encuentra, se sobreescriben los datos del viejo equipo con los del nuevo equipo
-    // Por último se devuelve un código de resultado exitoso por el equipo editado
+// Para actualizar un equipo hay que consultar que el equipo se encuentre en la bd
+// En caso de que no esté, regresamos un mensaje de error que la aplicación se encargará de procesar
+// Si se encuentra, se sobreescriben los datos del viejo equipo con los del nuevo equipo
+// Por último se devuelve un código de resultado exitoso por el equipo editado
+exports.update = async (req, res) => {
+    if(!req.params.idEquipo){
+        console.log("ERROR: No puede editar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Checamos que el body del request no esté vacío
+    if(!req.body.categoria || !req.body.nombre_entidad || !req.body.nombre_equipo 
+        || !req.body.rama || !req.body.tipo_equipo){
+            console.log("ERROR: No puede editar un equipo vacío");
+            res.status(400).send(null);
+            return;
+    }
+
+    console.log(req.body.contrario);
+
+    let cont
+    if(req.body.contrario == "False" || !req.body.contrario){
+        cont = false
+    }else{
+        cont = true
+    }
+
+    // Checamos que el equipo esté en la BD y sea un equipo rival
+    const rival = await Equipo.findAll({
+        where: {
+            id: req.params.idEquipo,
+            contrario: cont
+        }
+    });
+
+    if(rival.length === 0){
+        console.log("ERROR: Equipo no encontrado");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const { categoria, contrario, nombre_entidad, nombre_equipo, 
+            rama, tipo_equipo } = req.body;
+        const registrosEditados = await Equipo.update({
+            categoria: categoria,
+            contrario: contrario  == "False" ? false : true,
+            nombre_entidad: nombre_entidad,
+            nombre_equipo: nombre_equipo,
+            rama: rama,
+            tipo_equipo: tipo_equipo
+        },{
+            where: { id: req.params.idEquipo }
+        });
+        if(registrosEditados.length > 0){
+            console.log("Equipo editado satisfactoriamente");
+            const equipoEditado = await Equipo.findAll({
+                where: { id: req.params.idEquipo }
+            });
+
+            if(equipoEditado.length > 0){
+                res.status(200).json(equipoEditado[0]);
+            }else{
+                console.log("No se pudo obtener al equipo editado");
+                res.status(500).send(null);
+            }
+        }else{
+            console.log("Jugador no editado");
+            res.status(500).send(null);
+        }
+    }catch (err) {
+        console.error(err);
+        res.status(500).send(null);
+    }
+    
 }
 
 // Para asociar un jugador a un equipo vamos a obtener el id del jugador insertado a la bd
