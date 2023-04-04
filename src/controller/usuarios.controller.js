@@ -155,6 +155,7 @@ exports.asociateTeam = async (req, res) => {
 // Luego usar ese id para hacer la búsqueda usando el modelo usuario_equipo
 // El modelo retornará el usuario y un array de equipos, por lo que sólo es necesario retornar el array
 // de equipos
+// Hay que filtrar los equipos por aquellos que no sean rivales
 exports.findTeams = async (req, res) => {
     // Checamos que el id no esté vacío
     if(!req.params.idUsuario){
@@ -182,6 +183,7 @@ exports.findTeams = async (req, res) => {
             through: {
                 model: Usuario_Equipo,
             },
+            where: { contrario: false },
             include: [
                 {
                     model: Jugador_Propio,
