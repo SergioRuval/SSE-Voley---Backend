@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes} = require("sequelize");
 const sequelize = require("../mysql");
-const Prueba_Fisica = require("./prueba_fisica.model");
 
 const Equipo = sequelize.define('equipo', {
         id: {
