@@ -1,4 +1,5 @@
-const {Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio, Usuario_Equipo} = require("../model/Relations/relaciones.model.js");
+const {Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, 
+    Equipo_Jugador_Propio, Usuario_Equipo, Competencia} = require("../model/Relations/relaciones.model.js");
 
 exports.findAll = async (req, res) => {
     await Usuario.findAll().then((data) => {
@@ -188,6 +189,9 @@ exports.findTeams = async (req, res) => {
                 },
                 {
                     model: Prueba_Fisica
+                },
+                {
+                    model: Competencia
                 }
             ]
         }

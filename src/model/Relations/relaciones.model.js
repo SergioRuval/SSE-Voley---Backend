@@ -42,4 +42,4 @@ Equipo.belongsToMany(Usuario, {
     otherKey: 'id_usuario'
 });
 
-module.exports = { Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio, Usuario_Equipo };
+module.exports = { Usuario, Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio, Usuario_Equipo, Competencia };

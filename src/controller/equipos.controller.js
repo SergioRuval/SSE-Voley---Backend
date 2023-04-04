@@ -1,4 +1,5 @@
-const {Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio} = require("../model/Relations/relaciones.model.js");
+const {Equipo, Jugador_Propio ,Prueba_Fisica, 
+    Equipo_Jugador_Propio, Competencia} = require("../model/Relations/relaciones.model.js");
 
 // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
 // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
@@ -33,6 +34,9 @@ exports.findByID = async (req, res) => {
                 },
                 {
                     model: Prueba_Fisica
+                },
+                {
+                    model: Competencia
                 }
             ]
         });
@@ -42,10 +46,10 @@ exports.findByID = async (req, res) => {
             res.status(400).send(null);
             return;
         }else{
-            res.status(200).json(equipo[0].jugador_propios);
+            res.status(200).json(equipo[0]);
         }
     } catch (error) {
-        console.log("ERROR: No se pudo obtener el equipo");
+        console.log("ERROR: No se pudo obtener el equipo - " + error.message);
         res.status(500).send(null);
     }
     
