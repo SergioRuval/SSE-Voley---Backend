@@ -17,5 +17,8 @@ module.exports = app => {
     //insertar una competencia a un equipo
     router.post("/:idEquipo/competencia", equipos.createTournament);
 
+    //eliminar una competencia
+    router.delete("/:idEquipo/competencia/:idCompetencia", equipos.deleteTournament);
+
     app.use("/api/equipos", router);
 }

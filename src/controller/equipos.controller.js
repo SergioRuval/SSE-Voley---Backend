@@ -201,3 +201,51 @@ exports.createTournament = async (req, res) => {
         res.status(500).send(null);
     }
 }
+
+// Para borrar una competencia validamos si los id de competencia y equipo no están vacíos
+// Luego buscamos si existen ambos id en la bd
+// Por último borramos el registro de la tabla competencia
+exports.deleteTournament = async (req, res) => {
+    if(!req.params.idEquipo || !req.params.idCompetencia){
+        console.log("ERROR: No puede asociar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que exista el id de equipo
+    const equipo = await Equipo.findAll({
+        where: { id: req.params.idEquipo }
+    });
+
+    if(equipo.length === 0){
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que exista el id de la competencia
+    const competencia = await Competencia.findAll({
+        where: { id: req.params.idCompetencia }
+    })
+
+    if(competencia.length === 0){
+        console.log("Id de competencia no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Hacemos el borrado
+    const destruidas = await Competencia.destroy({
+        where: { id: req.params.idCompetencia }
+    })
+
+    if(destruidas > 0){
+        res.status(200).send({
+            message: "Competencia eliminada con éxito"
+        });
+    }else{
+        console.log("ERROR: no se pudo eliminar la competencia");
+        res.status(500).send(false);
+        return;
+    }
+}
