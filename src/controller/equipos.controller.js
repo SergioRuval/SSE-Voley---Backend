@@ -15,11 +15,39 @@ exports.findAll = async (req, res) => {
     });
 }
 
-exports.findByID = (req, res) => {
-    console.log("Obteniendo un equipo");
-    // Para encontrar por ID necesito obtener el ID de la petición req
-    // Luego uso ese valor para hacer el query correspondiente SELECT * FROM equipo WHERE id = ${id}
-    // Por último retorno el equipo encontrado
+// Para encontrar por ID necesito obtener el ID de la petición req
+// Luego uso ese valor para hacer el query correspondiente SELECT * FROM equipo WHERE id = ${id}
+// Por último retorno el equipo encontrado
+exports.findByID = async (req, res) => {
+    if(!req.params.idEquipo){
+        console.log("ERROR: No se puede registrar un equipo con un campo vacío");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const equipo = await Equipo.findAll({
+            where: { id: req.params.idEquipo },
+            include: [
+                {
+                    model: Jugador_Propio,
+                    through: { model: Equipo_Jugador_Propio }
+                }
+            ]
+        });
+    
+        if(equipo.length === 0){
+            console.log("Id de equipo no encontrado");
+            res.status(400).send(null);
+            return;
+        }else{
+            res.status(200).json(equipo[0].jugador_propios);
+        }
+    } catch (error) {
+        console.log("ERROR: No se pudo obtener el equipo");
+        res.status(500).send(nul);
+    }
+    
 }
 
 // Para crear un equipo primero hay que obtener el objeto json desde la petición req
@@ -93,7 +121,7 @@ exports.asociatePlayer = async (req, res) => {
         return;
     }
 
-    // Validamos que exista el equipo
+    // Validamos que exista el jugador
     const jugador = await Jugador_Propio.findAll({
         where: { id: req.params.idJugador }
     });
