@@ -5,8 +5,11 @@ module.exports = app => {
     //obtener todos los jugadores
     router.get("/", jugadores.findJugadoresPropios);
 
-    //insertar jugador
+    //insertar jugador propio
     router.post("/", jugadores.saveJugadorPropio);
+
+    //insertar un jugador contrario
+    router.post("/jugadorContrario", jugadores.saveJugadorContrario);
 
     //editar jugador
     router.put("/:idJugador", jugadores.editJugadorPropio);

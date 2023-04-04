@@ -1,5 +1,6 @@
 const Equipo_Jugador_Propio = require("../model/equipo_jugador_propio.model");
 const JugadorPropio = require("../model/jugador_propio.model");
+const JugadorContrario = require("../model/jugador_contrario.model");
 
 
 // Para encontrar los jugadores propios lo que tengo que hacer es pasar el id del equipo propio
@@ -12,11 +13,12 @@ exports.findJugadoresPropios = async (req, res) => {
     });
 }
 
+// Para encontrar los jugadores contrarios hacemos básicamente lo mismo que con jugadores propios
+// La diferencia es que esta vez recibiremos un equipo contrario, del que usaremos su id para
+// Buscar en la tabla equipo_jugador_contrario los ids de los jugadores de dicho equipo y poder
+// obtenerlos todos desde la tabla de jugadores contrarios
 exports.findJugadoresContrarios = (req, res) => {
-    // Para encontrar los jugadores contrarios hacemos básicamente lo mismo que con jugadores propios
-    // La diferencia es que esta vez recibiremos un equipo contrario, del que usaremos su id para
-    // Buscar en la tabla equipo_jugador_contrario los ids de los jugadores de dicho equipo y poder
-    // obtenerlos todos desde la tabla de jugadores contrarios
+    
 }
 
 exports.findJugadorPropio = (req, res) => {
@@ -63,6 +65,33 @@ exports.saveJugadorPropio = async (req, res) => {
     }
 }
 
+// Para guardar el jugador necesitamos guardarlo en la tabla jugador propio
+// Desde el body de la petición obtenemos los campos correspondientes al jugador
+// Validamos que ninguno de dichos campos esté vacío
+// Luego hacemos la inserción por medio del modelo de Sequelize
+exports.saveJugadorContrario = async (req, res) =>{
+    if(!req.body.genero || !req.body.no_jugador || !req.body.nombre || !req.body.posicion){
+        console.log("ERROR: no puede haber campos vacíos al insertar un jugador");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const { capitan, genero, no_jugador, nombre, posicion } = req.body;
+        const nuevoJugador = await JugadorContrario.create({
+            capitan: capitan,
+            genero: genero,
+            no_jugador: no_jugador,
+            nombre: nombre,
+            posicion: posicion
+        });
+        console.log("Jugador añadido satisfactoriamente");
+        res.status(200).json(nuevoJugador);
+    }catch (err) {
+        console.error(err);
+        res.status(500).send(null);
+    }
+}
 
 // Para editar obtenemos el id del jugador y checamos que no esté vacío
 // Luego validamos que los datos del jugador tampoco estén vacíos
