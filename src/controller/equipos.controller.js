@@ -1,4 +1,5 @@
-const {Equipo, Jugador_Propio ,Prueba_Fisica, Equipo_Jugador_Propio} = require("../model/Relations/relaciones.model.js");
+const {Equipo, Jugador_Propio ,Prueba_Fisica, 
+    Equipo_Jugador_Propio, Competencia} = require("../model/Relations/relaciones.model.js");
 
 // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
 // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
@@ -33,6 +34,9 @@ exports.findByID = async (req, res) => {
                 },
                 {
                     model: Prueba_Fisica
+                },
+                {
+                    model: Competencia
                 }
             ]
         });
@@ -42,10 +46,10 @@ exports.findByID = async (req, res) => {
             res.status(400).send(null);
             return;
         }else{
-            res.status(200).json(equipo[0].jugador_propios);
+            res.status(200).json(equipo[0]);
         }
     } catch (error) {
-        console.log("ERROR: No se pudo obtener el equipo");
+        console.log("ERROR: No se pudo obtener el equipo - " + error.message);
         res.status(500).send(null);
     }
     
@@ -146,4 +150,54 @@ exports.asociatePlayer = async (req, res) => {
         console.log("ERROR: " + err.original.message);
         res.status(400).send(false)
     });
+}
+
+// Para crear una nueva competencia necesito obtener el id del equipo al que está asociada
+// El tipo de competencia lo llenaré en base a ids mapeados manualmente
+// El resto de información la obtengo del body de la petición
+// Valido que el id y los campos del body no estén vacíos
+// Luego valido que exista el id del equipo al que se agregará la competencia
+// Luego se hace la inserción por medio del modelo de competencias
+exports.createTournament = async (req, res) => {
+    if(!req.params.idEquipo){
+        console.log("ERROR: No puede asociar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Luego validamos que los campos de la petición no estén vacíos
+    if(!req.body.nombre || !req.body.fecha_inicio || !req.body.fecha_fin || !req.body.id_tipo){
+        console.log("ERROR: No se puede insertar una competencia con campos vacíos");
+        res.status(400).send(null);
+        return;
+    }
+
+    // Ahora verificamos que el id del equipo exista en la bd
+    const equipo = await Equipo.findAll({
+        where: { id: req.params.idEquipo }
+    });
+
+    if(equipo.length === 0){
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(null);
+        return;
+    }
+
+    try {
+        const { nombre, fecha_inicio, fecha_fin, id_tipo, activa } = req.body;
+        console.log(fecha_fin);
+        const nuevaCompetencia = await Competencia.create({
+            activa: activa,
+            fecha_fin: fecha_fin,
+            fecha_inicio: fecha_inicio,
+            nombre: nombre,
+            id_equipo: req.params.idEquipo,
+            id_tipo: id_tipo
+        });
+        console.log(nuevaCompetencia.fecha_fin);
+        res.status(200).json(nuevaCompetencia);
+    }catch (err) {
+        console.error(err);
+        res.status(500).send(null);
+    }
 }
