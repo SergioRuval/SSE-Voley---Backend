@@ -20,6 +20,9 @@ module.exports = app => {
     //obtener un equipo por id
     router.get("/:idEquipo", equipos.findByID);
 
+    // Eliminar un equipo por id
+    router.delete("/:idEquipo", equipos.delete);
+
     //insertar una competencia a un equipo
     router.post("/:idEquipo/competencia", equipos.createTournament);
 

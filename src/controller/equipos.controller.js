@@ -1,5 +1,5 @@
 const {Equipo, Jugador_Propio, Jugador_Contrario ,Prueba_Fisica, 
-    Equipo_Jugador_Propio, Equipo_Jugador_Contrario, Competencia} = require("../model/Relations/relaciones.model.js");
+    Equipo_Jugador_Propio, Equipo_Jugador_Contrario, Competencia, Usuario_Equipo} = require("../model/Relations/relaciones.model.js");
 
 // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
 // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
@@ -84,15 +84,168 @@ exports.create = async (req, res) => {
     }
 }
 
-exports.delete = (req, res) => {
-    console.log("Borrando un equipo");
-    // Para borrar el equipo hay que hacer varias cosas
-    // Primero es confirmar si el equipo existe al buscar con su id un campo en la BD
-    // Luego, es eliminar todas las relaciones que tiene, que en este caso serían los partidos, jugadores
-    // rivales y todo lo asociado, usando el id del equipo como referencia
-    // Una forma de hacerlo sería borrando todo directamente empezando por los datos más libres de relaciones
-    // y moviéndose poco a poco a aquellas relaciones que van quedando desocupadas
-    // Por último habría que borrar el equipo, una vez que todo lo demás ha sido borrado
+//Para borrar un equipolo primero es verificar que el id no esté vacío
+//Luego hay que validar que el equipo exista en la bd
+//Después hay que eliminar los jugadores sí y solo sí solo forman parte de este equipo
+//Una vez eliminados los jugadores, eliminamos la asociación de equipo y usuario
+//Por último borramos el equipo
+exports.delete =  async (req, res) => {
+    if(!req.params.idEquipo){
+        console.log("ERROR: No puede borrar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validemos que el equipo está en la tabla de la bd
+    const equipo = await Equipo.findAll({
+        where: { id: req.params.idEquipo },
+        include: [
+            {
+                model: Jugador_Propio,
+                through: { model: Equipo_Jugador_Propio }
+            },{
+                model: Jugador_Contrario,
+                through: { model: Equipo_Jugador_Contrario }
+            },
+            {
+                model: Prueba_Fisica
+            },
+            {
+                model: Competencia
+            }
+        ]
+    });
+    if(equipo.length === 0){
+        console.log("ERROR: No existe el equipo a borrar");
+        res.status(400).send(false);
+        return;
+    }
+        // }else{
+    //     console.log("Equipo y relaciones encontrados");
+    //     res.status(200).json(equipo);
+    //     return;
+    // }
+    // Si existe, lo que sigue es borrar cada jugador, para ello obtenemos todos los jugadores
+    // por su id, por medio de la tabla equipo_jugador
+    // Para esto hay que validar primero si es un equipo contrario o no
+    
+    try {
+        // Borramos cada jugador relacionado con el equipo
+        let jugadoresAsociadosBorrados = await Equipo_Jugador_Propio.destroy({
+            where: { 
+                id_equipo: req.params.idEquipo      
+            }
+        });
+
+        console.log("Jugadores propios desasociados " + jugadoresAsociadosBorrados);
+
+        jugadoresAsociadosBorrados = await Equipo_Jugador_Contrario.destroy({
+            where: {
+                id_equipo: req.params.idEquipo
+            }
+        });
+
+        console.log("Jugadores contrarios desasociados " + jugadoresAsociadosBorrados);
+
+        // Luego obtenemos los jugadores
+        let jugadores = equipo[0].jugador_propios;
+        // Recorremos cada jugador y lo borramos de la tabla correspoindiente, en caso de que no esté en otro equipo
+        jugadores.forEach(async jugador => {
+            idJugador = jugador.id
+            let jugadoresAunAsociados = await Equipo_Jugador_Propio.findAll({
+                where: { id_jugador: idJugador }
+            });
+
+            if(jugadoresAunAsociados.length === 0){
+                await Jugador_Propio.destroy({
+                    where: { id: idJugador }
+                }).then(result => {
+                    console.log("Jugador propio " + idJugador + " borrado permanentemente con filas afectadas " + result);
+                });
+            }else{
+                console.log("Jugador propio " + idJugador + " sigue asociado a otro equipo");
+            }
+
+            jugadoresAunAsociados = await Equipo_Jugador_Contrario.findAll({
+                where: { id_jugador: idJugador }
+            });
+
+            if(jugadoresAunAsociados.length === 0){
+                await Jugador_Contrario.destroy({
+                    where: { id: idJugador }
+                }).then(result => {
+                    console.log("Jugador contrario " + idJugador + " borrado permanentemente con filas afectadas " + result);
+                });
+            }else{
+                console.log("Jugador contrario " + idJugador + " sigue asociado a otro equipo");
+            }
+        });
+
+        jugadores = equipo[0].jugador_contrarios;
+        // Recorremos cada jugador y lo borramos de la tabla correspoindiente, en caso de que no esté en otro equipo
+        jugadores.forEach(async jugador => {
+            idJugador = jugador.id
+
+            jugadoresAunAsociados = await Equipo_Jugador_Contrario.findAll({
+                where: { id_jugador: idJugador }
+            });
+
+            if(jugadoresAunAsociados.length === 0){
+                await Jugador_Contrario.destroy({
+                    where: { id: idJugador }
+                }).then(result => {
+                    console.log("Jugador contrario " + idJugador + " borrado permanentemente con filas afectadas " + result);
+                });
+            }else{
+                console.log("Jugador contrario " + idJugador + " sigue asociado a otro equipo");
+            }
+        });
+
+        // Luego borramos las pruebas físicas
+        let pruebasBorradas = await Prueba_Fisica.destroy({
+            where: { id_equipo: req.params.idEquipo }
+        })
+
+        console.log("Se borraron " + pruebasBorradas + " pruebas físicas");
+
+        // Por último borramos las competencias
+        let competenciasBorradas = await Competencia.destroy({
+            where: { id_equipo: req.params.idEquipo }
+        });
+
+        console.log("Se borraron " + competenciasBorradas + " competencias");
+
+        // Procedemos a borrar su relación con el usuario
+        const asociacionEquipoBorradas = await Usuario_Equipo.destroy({
+            where: { id_equipo: req.params.idEquipo }
+        });
+
+        if(asociacionEquipoBorradas == 0){
+            console.log("ERROR: No se pudo borrar la asociación de equipo");
+            res.status(400).send(false);
+            return;
+        }else{
+            console.log("Se borraron las asociaciones con cantidad de " + asociacionEquipoBorradas);
+        }
+
+        const equiposBorrados = await Equipo.destroy({
+            where: { id: req.params.idEquipo }
+        });
+
+        if(equiposBorrados == 0){
+            console.log("ERROR: No se pudo borrar la asociación de equipo");
+            res.status(400).send(false);
+            return;
+        }else{
+            console.log("Equipo borrado satisfactoriamente");
+            res.status(200).send(true);
+        }
+    } catch (error) {
+        console.log("ERROR: No se pudo borrar el equipo - " + error);
+        res.status(400).send(false);
+        return;
+    }
+    
 }
 
 // Para actualizar un equipo hay que consultar que el equipo se encuentre en la bd
