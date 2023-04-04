@@ -11,6 +11,9 @@ module.exports = app => {
     //asociar un jugador a un equipo
     router.put("/:idEquipo/jugadorPropio/:idJugador", equipos.asociatePlayer);
 
+    //asociar un jugador contrario a un equipo contrario
+    router.put("/:idEquipo/jugadorContrario/:idJugadorRival", equipos.asociateRivalPlayer);
+
     //obtener un equipo por id
     router.get("/:idEquipo", equipos.findByID);
 

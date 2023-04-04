@@ -1,11 +1,10 @@
-const {Equipo, Jugador_Propio ,Prueba_Fisica, 
-    Equipo_Jugador_Propio, Competencia} = require("../model/Relations/relaciones.model.js");
+const {Equipo, Jugador_Propio, Jugador_Contrario ,Prueba_Fisica, 
+    Equipo_Jugador_Propio, Equipo_Jugador_Contrario, Competencia} = require("../model/Relations/relaciones.model.js");
 
 // Para obtener los equipos hay que simplemente hacer la búsqueda en la BD
 // El detalle sería obtener los equipos contrarios, ya que estos tienen un campo adicional a validar
 // Para esto puedo crear dos endpoints diferentes, uno para los equipos propios y uno para los contrarios
 // y así separar la lógica de ambos
-
 exports.findAll = async (req, res) => {
     await Equipo.findAll().then((data) => {
         res.status(200).json(data);
@@ -140,6 +139,59 @@ exports.asociatePlayer = async (req, res) => {
     // Ahora hacemos la inserción de ambos id en la tabla de unión
     await Equipo_Jugador_Propio.create({
         id_jugador: req.params.idJugador, 
+        id_equipo: req.params.idEquipo
+    }).then((data) => {
+        if(data.length != 0){
+            console.log("Asociación hecha");
+            res.status(200).send(true);
+        }
+    }).catch((err) => {
+        console.log("ERROR: " + err.original.message);
+        res.status(400).send(false)
+    });
+}
+
+// Para asociar un jugador rival obtenemos el id del jugador insertado y el del equipo
+// Primero validamos que ambos id no estén vacíos
+// Luego verificamos que ambos id existan
+// Después verificamos que el equipo realmente sea un equipo contrario
+// Una vez hecho esto podemos asociarlos insertando en la tabla equipo_jugador_contrario
+exports.asociateRivalPlayer = async (req, res) => {
+    // Validamos que los ids no estén vacíos
+    if(!req.params.idEquipo || !req.params.idJugadorRival){
+        console.log("ERROR: No puede asociar un id vacío");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que el equipo exista en la bd y que sea un equipo contrario
+    const equipo = await Equipo.findAll({
+        where: { 
+            id: req.params.idEquipo,
+            contrario: true
+        }
+    });
+
+    if(equipo.length === 0){
+        console.log("Id de equipo no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Validamos que el jugador exista
+    const jugador = await Jugador_Contrario.findAll({
+        where: { id: req.params.idJugadorRival }
+    });
+
+    if(jugador.length === 0){
+        console.log("Id de jugador no encontrado");
+        res.status(400).send(false);
+        return;
+    }
+
+    // Ahora hacemos la inserción de ambos id en la tabla de unión
+    await Equipo_Jugador_Contrario.create({
+        id_jugador: req.params.idJugadorRival, 
         id_equipo: req.params.idEquipo
     }).then((data) => {
         if(data.length != 0){
