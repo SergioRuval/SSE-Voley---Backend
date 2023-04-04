@@ -8,6 +8,9 @@ module.exports = app => {
     //insertar equipo
     router.post("/", equipos.create);
 
+    //editar un equipo
+    router.put("/:idEquipo", equipos.update);
+
     //asociar un jugador a un equipo
     router.put("/:idEquipo/jugadorPropio/:idJugador", equipos.asociatePlayer);
 
@@ -16,6 +19,9 @@ module.exports = app => {
 
     //obtener un equipo por id
     router.get("/:idEquipo", equipos.findByID);
+
+    // Eliminar un equipo por id
+    router.delete("/:idEquipo", equipos.delete);
 
     //insertar una competencia a un equipo
     router.post("/:idEquipo/competencia", equipos.createTournament);

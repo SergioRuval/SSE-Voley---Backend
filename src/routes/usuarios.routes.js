@@ -20,5 +20,8 @@ module.exports = app => {
     //obtener los equipos por usuario
     router.get("/:idUsuario/equipos", usuarios.findTeams);
 
+    //obtener los equipos rivales por usuario
+    router.get("/:idUsuario/equiposRivales", usuarios.findRivalTeams);
+
     app.use("/api/usuarios", router);
 }
