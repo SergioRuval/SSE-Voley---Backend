@@ -2,10 +2,16 @@ const Usuario = require("../usuario.model");
 const Prueba_Fisica = require("../prueba_fisica.model");
 const Jugador_Propio = require("../jugador_propio.model");
 const Equipo = require("../equipo.model");
+const Competencia = require("../competencia.model");
 
 // Tablas intermedias
 const Equipo_Jugador_Propio = require("../equipo_jugador_propio.model");
 const Usuario_Equipo = require("../usuario_equipo.model");
+
+
+// Relaciones de Equipo con Competencia
+Equipo.hasMany(Competencia, { foreignKey: "id_equipo" });
+Competencia.belongsTo(Equipo, { foreignKey: "id_equipo" });
 
 // Relaciones de Equipo con Prueba Física
 Equipo.hasMany(Prueba_Fisica, { foreignKey: "id_equipo" });
